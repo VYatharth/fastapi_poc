@@ -1,0 +1,72 @@
+pipeline {
+    agent any
+    environment {
+        sqScannerMsBuildHome = tool 'sonar_scanner_dotnet'
+        kubeNamespace = 'yathartha-develop-ns'
+        dockerContainerName = 'c-yatharthavarshneya-develop'
+        dockerImageName = 'i-yatharthavarshneya-develop'
+        helmDeploymentName = 'helm-develop-deployment'
+    }
+    stages {    
+        stage('nuget restore') {
+            steps {
+                bat "dotnet restore Hello-World-DotNetCore\\WebApplication4.sln"
+            }
+        }
+        stage('Code build') {
+            steps {
+                bat "dotnet build Hello-World-DotNetCore\\WebApplication4.sln -c Release"
+            }
+        }
+        stage('Release artifact') {
+           steps {
+                 bat "dotnet publish Hello-World-DotNetCore\\WebApplication4.sln -c Release --output Hello-World-DotNetCore/WebApplication4/app/publish"
+            }
+        }
+        stage('Docker Image') {
+           steps {
+                 bat "docker build -t ${dockerImageName} ./Hello-World-DotNetCore/WebApplication4"
+            }
+        }
+        stage('Containers') {
+           parallel{
+                stage('Precontainer Check'){
+                    steps{
+                        script{
+				            containerId = powershell(script:"docker ps -q -f name=${dockerContainerName}", returnStdout:true, label:'')
+				            if(containerId){
+					            bat "docker container stop ${dockerContainerName}"
+					            bat "docker container rm ${dockerContainerName}"
+				            }
+			            }
+                    }
+                }
+
+                stage('Push to DTR'){
+                    steps{
+			            bat "docker tag ${dockerImageName} dtr.nagarro.com:443/${dockerImageName}"
+                        bat "docker push dtr.nagarro.com:443/${dockerImageName}"
+                    }
+                }
+            }
+        }
+        stage('Docker deployment'){
+            steps{
+                bat "docker run --name ${dockerContainerName} -d -p 6100:80 dtr.nagarro.com:443/${dockerImageName}"
+            }
+        }
+        stage('Helm Chart Deployment'){
+            steps{
+                script{
+                    namespace = powershell(script:"kubectl get namespaces | Out-String -Stream | Select-String ${kubeNamespace}", returnStdout:true, label:'')
+                
+                    if(namespace){
+                        bat "kubectl delete namespaces ${kubeNamespace}"
+                    }
+                    bat "kubectl create ns ${kubeNamespace}"
+                    bat "helm install ${helmDeploymentName} ./chartNagp -n ${kubeNamespace}"
+                }
+			}
+        }
+    }
+}    
