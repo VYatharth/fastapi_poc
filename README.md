@@ -1,2 +1,1 @@
-# devops
-devops practice
+# FastAPI
