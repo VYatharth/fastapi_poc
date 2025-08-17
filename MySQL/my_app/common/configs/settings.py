@@ -21,23 +21,10 @@ class Settings(BaseSettings):
     APP_NAME: str = "User App"
     ROOT_PATH: str = "/api"
 
-    PDF_QUESTION_BUCKET: str = "my-portfolio-question-bucket"
-    PROJECT_ID: str = "my-app-424608"
-
-    SECRET_ID: str = "gg-secret"
-    SECRET_VERSION: str = "2"
-    READ_SECRET_FROM_ENV: bool = True  # read from environment variable
-
-    GEMINI_VERSION: str = "gemini-1.5-flash"  # "gemini-pro"
-    EMBEDDING_MODEL: str = "models/embedding-001"
-    QUESTION_BUCKET: str = "my-portfolio-question-bucket"
-    BLOB_BASE_NAME: str = "testy-bytes"
-
     model_config = SettingsConfigDict(
         env_file=".env", env_ignore_empty=True, extra="ignore"
     )
     API_V1_STR: str = "/api/v1"
-    SECRET_KEY: str = secrets.token_urlsafe(32)
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
     DOMAIN: str = "localhost"
@@ -53,13 +40,7 @@ class Settings(BaseSettings):
             return f"http://{self.DOMAIN}"
         return f"https://{self.DOMAIN}"
 
-        # "http://localhost",
-        # "http://localhost:5173",
-    BACKEND_CORS_ORIGINS: Annotated[list[AnyUrl] | str, BeforeValidator(parse_cors)] = [
-        "https://vyathartha.com",
-        "https://vyathartha.com/",
-        "https://www.vyathartha.com",
-    ]
+    BACKEND_CORS_ORIGINS: Annotated[list[AnyUrl] | str, BeforeValidator(parse_cors)] = []
 
 
 settings = Settings()  # type: ignore
