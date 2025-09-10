@@ -36,7 +36,7 @@ class BaseRepositoryImpl(Generic[DBModelType], ABC):
             update(self._model_cls), [data]
         )
 
-    def _remove(self, entity_id: str) -> None:
+    def remove(self, entity_id: str) -> None:
         record = self._get_by_id(entity_id)
         if record is not None:
             self._session.delete(record)
