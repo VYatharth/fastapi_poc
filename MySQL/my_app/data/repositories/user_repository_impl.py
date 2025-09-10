@@ -1,4 +1,3 @@
-from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -38,9 +37,10 @@ class UserRepositoryImpl(BaseRepositoryImpl[DbUser], IUserRepository[DbUser]):
         ).first()
         return User.model_validate(db_user, from_attributes=True) if db_user else None
 
-    def list_all(self) -> list[User]:
+    def list_all(self, **filters) -> list[User]:
         # db_users = list(self._session.scalars(select(UserDBModel)).all())
-        db_users = self._list_all()
+        db_users = self._list_all(**filters)
         return [
             User.model_validate(db_user, from_attributes=True) for db_user in db_users
         ]
+    
