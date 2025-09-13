@@ -2,7 +2,8 @@ import uuid
 
 from fastapi import APIRouter, HTTPException
 
-from my_app.api.dependencies import UserServiceDependency
+from my_app.domain.entities.department import Department
+from my_app.api.dependencies import UserServiceDependency, DepartmentServiceDependency
 from my_app.common.models.exceptions import UserUpdateException, UserNotFoundException
 from my_app.common.models.user_dtos import CreateUserDto
 from my_app.domain.entities.user import User
@@ -65,3 +66,11 @@ def delete_user(
 
     except ValueError as e:
         raise HTTPException(status_code=401, detail=str(e))
+
+
+@router.get("/get_department/{user_id}")
+def get_department_for_user(
+    user_id: str,
+    department_service: DepartmentServiceDependency,
+) -> Department | None:
+    return department_service.get_department_for_user(user_id)
