@@ -27,5 +27,5 @@ class IBaseRepository(Generic[DomainModelType,DBModelType], ABC):
         raise NotImplementedError()
     
     @abstractmethod
-    def list_all(self) -> list[DomainModelType]:
+    def list_all(self, **filters) -> list[DomainModelType]:
         raise NotImplementedError()
