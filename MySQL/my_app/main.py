@@ -2,6 +2,7 @@
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
 
+from my_app.data.core import DbBase, engine
 from my_app.common.configs.settings import settings
 from my_app.api.router_config import api_router
 
@@ -15,6 +16,8 @@ app = FastAPI(
     # openapi_url=f"{settings.API_V1_STR}/openapi.json",
     root_path=settings.ROOT_PATH
 )
+
+DbBase.metadata.create_all(engine)
 
 # Set all CORS enabled origins
 # if settings.BACKEND_CORS_ORIGINS:
